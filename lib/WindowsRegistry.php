@@ -4,70 +4,98 @@ namespace Amp\WindowsRegistry;
 
 use Amp\ByteStream\Message;
 use Amp\Process\Process;
+use Amp\Process\ProcessException;
 use Amp\Promise;
-use function Amp\call;
 
-class WindowsRegistry {
-    public function read(string $key): Promise {
-        return call(function () use ($key) {
-            $key = \strtr($key, '/', "\\");
-            $parts = \explode("\\", $key);
+class WindowsRegistry
+{
+    /**
+     * @param string $key
+     *
+     * @return null|string
+     *
+     * @throws MissingKeyException
+     * @throws QueryException
+     */
+    public function read(string $key): ?string
+    {
+        $key = \strtr($key, '/', "\\");
+        $parts = \explode("\\", $key);
 
-            $value = \array_pop($parts);
-            $key = \implode("\\", $parts);
+        $value = \array_pop($parts);
+        $key = \implode("\\", $parts);
 
-            $lines = yield $this->query($key);
+        $lines = $this->query($key);
 
-            $lines = array_filter($lines, function ($line) {
-                return '' !== $line && $line[0] === ' ';
-            });
-
-            $values = \array_map(function ($line) {
-                return \preg_split("(\\s+)", \ltrim($line), 3);
-            }, $lines);
-
-            foreach ($values as $v) {
-                if ($v[0] === $value) {
-                    return $v[2];
-                }
-            }
-
-            throw new KeyNotFoundException("Windows registry key '{$key}\\{$value}' not found.");
+        $lines = array_filter($lines, function ($line) {
+            return '' !== $line && $line[0] === ' ';
         });
+
+        $values = \array_map(function ($line) {
+            return \preg_split("(\\s+)", \ltrim($line), 3);
+        }, $lines);
+
+        foreach ($values as $v) {
+            if ($v[0] === $value) {
+                return $v[2];
+            }
+        }
+
+        throw new MissingKeyException("Windows registry key '{$key}\\{$value}' not found.");
     }
 
-    public function listKeys(string $key): Promise {
-        return call(function () use ($key) {
-            $lines = yield $this->query($key);
+    /**
+     * @param string $key
+     *
+     * @return array
+     *
+     * @throws MissingKeyException
+     * @throws QueryException
+     */
+    public function listKeys(string $key): array
+    {
+        $lines = $this->query($key);
 
-            $lines = \array_filter($lines, function ($line) {
-                return '' !== $line && $line[0] !== ' ';
-            });
-
-            return $lines;
+        $lines = \array_filter($lines, function ($line) {
+            return '' !== $line && $line[0] !== ' ';
         });
+
+        return $lines;
     }
 
-    private function query(string $key): Promise {
-        return call(function () use ($key) {
-            if (0 !== stripos(\PHP_OS, 'WIN')) {
-                throw new \Error('Not running on Windows.');
-            }
+    /**
+     * @param string $key
+     *
+     * @return array
+     *
+     * @throws MissingKeyException
+     * @throws QueryException
+     * @throws \Error
+     */
+    private function query(string $key): array
+    {
+        if (0 !== stripos(\PHP_OS, 'WIN')) {
+            throw new \Error('Not running on Windows.');
+        }
 
-            $key = \strtr($key, '/', "\\");
+        $key = \strtr($key, '/', "\\");
 
-            $cmd = \sprintf('reg query %s', \escapeshellarg($key));
-            $process = new Process($cmd);
+        $cmd = \sprintf('reg query %s', \escapeshellarg($key));
+        $process = new Process($cmd);
+
+        try {
             $process->start();
+        } catch (ProcessException $e) {
+            throw new QueryException("Executing '{$cmd}' failed", 0, $e);
+        }
 
-            $stdout = yield new Message($process->getStdout());
-            $code = yield $process->join();
+        $stdout = (new Message($process->getStdout()))->buffer();
+        $code = $process->join();
 
-            if ($code !== 0) {
-                throw new KeyNotFoundException("Windows registry key '{$key}' not found.");
-            }
+        if ($code !== 0) {
+            throw new MissingKeyException("Windows registry key '{$key}' not found.");
+        }
 
-            return \explode("\n", \str_replace("\r", '', $stdout));
-        });
+        return \explode("\n", \str_replace("\r", '', $stdout));
     }
 }

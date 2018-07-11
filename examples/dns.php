@@ -1,7 +1,7 @@
 <?php
 
 use Amp\Loop;
-use Amp\WindowsRegistry\KeyNotFoundException;
+use Amp\WindowsRegistry\MissingKeyException;
 use Amp\WindowsRegistry\WindowsRegistry;
 
 require __DIR__ . "/../vendor/autoload.php";
@@ -20,7 +20,7 @@ Loop::run(function () {
     while ($nameserver === "" && ($key = \array_shift($keys))) {
         try {
             $nameserver = yield $reader->read($key);
-        } catch (KeyNotFoundException $e) {
+        } catch (MissingKeyException $e) {
         }
     }
 
@@ -35,7 +35,7 @@ Loop::run(function () {
                     if ($nameserver !== "") {
                         break 2;
                     }
-                } catch (KeyNotFoundException $e) {
+                } catch (MissingKeyException $e) {
                 }
             }
         }

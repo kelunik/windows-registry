@@ -15,15 +15,17 @@
         }
     },
     "require": {
-        "amphp/amp": "^2",
-        "amphp/process": "^0.2 || ^0.3"
+        "amphp/amp": "dev-ext-task",
+        "amphp/process": "dev-ext-task"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3"
     },
     "config": {
         "platform": {
-            "php": "7.0.0"
+            "php": "7.2.0"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
