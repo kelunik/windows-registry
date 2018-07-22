@@ -3,6 +3,8 @@
     "description": "Windows Registry Reader.",
     "type": "library",
     "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "authors": [
         {
             "name": "Niklas Keller",
@@ -15,8 +17,8 @@
         }
     },
     "require": {
-        "amphp/amp": "dev-ext-task",
-        "amphp/process": "dev-ext-task"
+        "amphp/amp": "dev-ext-async",
+        "amphp/process": "dev-ext-async"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.3"
@@ -25,7 +27,5 @@
         "platform": {
             "php": "7.2.0"
         }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }
