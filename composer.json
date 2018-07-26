@@ -21,11 +21,19 @@
         "amphp/process": "dev-ext-async"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.3"
+        "amphp/php-cs-fixer-config": "dev-master"
     },
     "config": {
         "platform": {
             "php": "7.2.0"
         }
+    },
+    "scripts": {
+        "check": [
+            "@cs",
+            "@test"
+        ],
+        "cs": "php-cs-fixer fix -v --diff --dry-run",
+        "cs-fix": "php-cs-fixer fix -v --diff"
     }
 }

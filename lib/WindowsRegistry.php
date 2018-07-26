@@ -5,7 +5,6 @@ namespace Amp\WindowsRegistry;
 use Amp\ByteStream\Message;
 use Amp\Process\Process;
 use Amp\Process\ProcessException;
-use Amp\Promise;
 
 class WindowsRegistry
 {
@@ -27,7 +26,7 @@ class WindowsRegistry
 
         $lines = $this->query($key);
 
-        $lines = array_filter($lines, function ($line) {
+        $lines = \array_filter($lines, function ($line) {
             return '' !== $line && $line[0] === ' ';
         });
 
@@ -74,7 +73,7 @@ class WindowsRegistry
      */
     private function query(string $key): array
     {
-        if (0 !== stripos(\PHP_OS, 'WIN')) {
+        if (0 !== \stripos(\PHP_OS, 'WIN')) {
             throw new \Error('Not running on Windows.');
         }
 

@@ -47,7 +47,7 @@ Loop::run(function () {
             return \trim($ns) . ":53";
         }, \explode(" ", \strtr($nameserver, ",", " ")));
 
-        print "Found nameservers: " . implode(", ", $nameservers) . PHP_EOL;
+        print "Found nameservers: " . \implode(", ", $nameservers) . PHP_EOL;
     } else {
         print "No nameservers found." . PHP_EOL;
     }

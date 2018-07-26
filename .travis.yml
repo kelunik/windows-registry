@@ -3,14 +3,11 @@ sudo: false
 language: php
 
 php:
-  - 7.0
-  - 7.1
-  - 7.2
   - nightly
 
 matrix:
-  allow_failures:
-    - php: nightly
+  # allow_failures:
+  #  - php: nightly
   fast_finish: true
 
 before_script:
@@ -21,4 +18,6 @@ script:
 
 cache:
   directories:
-    - $HOME/.composer/cache/files
+    - $HOME/.composer/cache
+    - $HOME/.php-cs-fixer
+    - $HOME/.local
