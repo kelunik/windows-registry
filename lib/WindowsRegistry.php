@@ -2,9 +2,8 @@
 
 namespace Amp\WindowsRegistry;
 
-use Amp\ByteStream\Message;
-use Amp\Process\Process;
-use Amp\Process\ProcessException;
+use Concurrent\Process\ProcessBuilder;
+use function Concurrent\Stream\buffer;
 
 class WindowsRegistry
 {
@@ -80,21 +79,23 @@ class WindowsRegistry
         $key = \strtr($key, '/', "\\");
 
         $cmd = \sprintf('reg query %s', \escapeshellarg($key));
-        $process = new Process($cmd);
+
+        $processBuilder = new ProcessBuilder($cmd);
+        $processBuilder->configureStdout(ProcessBuilder::STDIO_PIPE);
 
         try {
-            $process->start();
-        } catch (ProcessException $e) {
+            $process = $processBuilder->start();
+
+            $output = buffer($process->getStdout());
+            $exitCode = $process->awaitExit();
+
+            if ($exitCode !== 0) {
+                throw new MissingKeyException("Windows registry key '{$key}' not found.");
+            }
+
+            return \explode("\n", \str_replace("\r", '', $output));
+        } catch (\Exception $e) {
             throw new QueryException("Executing '{$cmd}' failed", 0, $e);
         }
-
-        $stdout = (new Message($process->getStdout()))->buffer();
-        $code = $process->join();
-
-        if ($code !== 0) {
-            throw new MissingKeyException("Windows registry key '{$key}' not found.");
-        }
-
-        return \explode("\n", \str_replace("\r", '', $stdout));
     }
 }

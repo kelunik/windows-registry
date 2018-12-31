@@ -17,23 +17,25 @@
         }
     },
     "require": {
+        "php": ">=7.3",
+        "ext-async": "*",
         "amphp/amp": "dev-ext-async",
-        "amphp/process": "dev-ext-async"
+        "amphp/byte-stream": "dev-ext-async"
     },
     "require-dev": {
-        "amphp/php-cs-fixer-config": "dev-master"
+        "amphp/php-cs-fixer-config": "dev-ext-async"
     },
     "config": {
         "platform": {
-            "php": "7.2.0"
+            "php": "7.3.0"
         }
     },
     "scripts": {
         "check": [
-            "@cs",
+            "@code-style",
             "@test"
         ],
-        "cs": "php-cs-fixer fix -v --diff --dry-run",
-        "cs-fix": "php-cs-fixer fix -v --diff"
+        "code-style": "php-cs-fixer fix -v --diff --dry-run",
+        "fix-code-style": "php-cs-fixer fix -v --diff"
     }
 }
