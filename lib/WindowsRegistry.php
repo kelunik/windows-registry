@@ -33,10 +33,20 @@ class WindowsRegistry
             return \preg_split("(\\s+)", \ltrim($line), 3);
         }, $lines);
 
+        $foundValue = null;
+
         foreach ($values as $v) {
             if ($v[0] === $value) {
-                return $v[2];
+                if (\count($v) >= 3) {
+                    return $v[2];
+                }
+
+                $foundValue = $v;
             }
+        }
+
+        if ($foundValue) {
+            throw new MissingKeyException("Windows registry key '{$key}\\{$value}' was found, but could not be read correctly, got " . \var_export($foundValue, true));
         }
 
         throw new MissingKeyException("Windows registry key '{$key}\\{$value}' not found.");
